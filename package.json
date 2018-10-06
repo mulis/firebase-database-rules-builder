@@ -1,13 +1,23 @@
 {
-  "name": "firebase-database-rules-builder",
-  "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "muliserg",
-  "license": "ISC",
-  "dependencies": {
-  }
+    "name": "firebase-database-rules-builder",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "tsc": "npx tsc",
+        "tsc:w": "npx tsc -w",
+        "test": "npx mocha -r ts-node/register test/*.spec.ts"
+    },
+    "author": "muliserg",
+    "license": "ISC",
+    "dependencies": {
+        "typescript": "latest",
+        "ts-node": "latest"
+    },
+    "devDependencies": {
+        "@types/chai": "latest",
+        "@types/mocha": "latest",
+        "chai": "latest",
+        "mocha": "latest"
+    }
 }
