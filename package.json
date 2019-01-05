@@ -6,7 +6,8 @@
     "scripts": {
         "tsc": "npx tsc",
         "tsc:w": "npx tsc -w",
-        "test": "npx mocha -r ts-node/register test/*.spec.ts"
+        "test": "npx mocha --require ts-node/register test/**/*.spec.ts",
+        "test:w": "npx tsc-watch --onSuccess 'npm run test'"
     },
     "author": "muliserg",
     "license": "ISC",
@@ -18,6 +19,7 @@
         "@types/chai": "latest",
         "@types/mocha": "latest",
         "chai": "latest",
-        "mocha": "latest"
+        "mocha": "latest",
+        "tsc-watch": "latest"
     }
 }
