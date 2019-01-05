@@ -1,6 +1,11 @@
 import * as chai from 'chai';
 
-import { Collection, EntityRule, PropertyRule, CollectionRule } from '../firebase-database-rules';
+import {
+    Collection,
+    EntityRule,
+    PropertyRule,
+    CollectionRule
+} from '../src/firebase-database-rules';
 
 interface Permissions {
 
