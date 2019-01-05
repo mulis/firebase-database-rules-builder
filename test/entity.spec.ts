@@ -77,15 +77,7 @@ describe('Entity rule definition', () => {
         let user: EntityRule<User> = {
             "relatives": <CollectionRule<Relative>>{
                 ".indexOn": [ "id" ],
-                "1": {
-                    id: {
-                        ".validate": true
-                    },
-                    name: {
-                        ".validate": true
-                    }
-                },
-                "2": {
+                "$key": {
                     id: {
                         ".validate": true
                     },
@@ -119,15 +111,7 @@ describe('Entity rule definition', () => {
 
             "relatives": <CollectionRule<Relative>>{
                 ".indexOn": [ "id" ],
-                "1": {
-                    id: {
-                        ".validate": true
-                    },
-                    name: {
-                        ".validate": true
-                    }
-                },
-                "2": {
+                "$key": {
                     id: {
                         ".validate": true
                     },
