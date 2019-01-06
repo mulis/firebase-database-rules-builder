@@ -6,20 +6,57 @@ type Partial<T> = {
     [P in keyof T]?: T[P];
 }
 
-type Collection<T> = {
+export type Collection<T> = {
     [ key: string ]: {
         [ P in keyof T]: T[P];
     }
 }
 
+export interface NullValue { }
+
+export interface BooleanValue { }
+
+export interface NumberValue { }
+
+export interface StringValue {
+
+    length: NumberValue;
+
+    contains(substring: string): BooleanValue;
+
+    beginsWith(substring: string): BooleanValue;
+
+    endsWith(substring: string): BooleanValue;
+
+    replace(substring: string, replacement: string): StringValue;
+
+    toLowerCase(): StringValue;
+
+    toUpperCase(): StringValue;
+
+    matches(regex: string): BooleanValue;
+
+}
+
 // Rule types
 
-export type LocationRuleDefinition = boolean | string;
+export enum ReservedKeys {
+    read = '.read',
+    write = '.write',
+    validate = '.validate',
+    indexOn = '.indexOn',
+}
+
+export enum ReservedValues {
+    value = '.value',
+}
+
+export type LocationRuleDefinition = BooleanValue | StringValue;
 
 export type LocationRule<T> = {
-    '.read'?: LocationRuleDefinition;
-    '.write'?: LocationRuleDefinition;
-    '.validate'?: LocationRuleDefinition;
+    [ReservedKeys.read]?: LocationRuleDefinition;
+    [ReservedKeys.write]?: LocationRuleDefinition;
+    [ReservedKeys.validate]?: LocationRuleDefinition;
 };
 
 export type PropertyRuleDefinition<T> = LocationRule<T> | EntityRule<T> | CollectionRule<T>;
@@ -30,10 +67,10 @@ export type PropertyRule<T> = {
 
 export type EntityRule<T> = LocationRule<T> & PropertyRule<T>;
 
-export type CollectionIndexRuleDefinition<T> = (keyof T)[] | '.value';
+export type CollectionIndexRuleDefinition<T> = (keyof T)[] | ReservedValues.value;
 
 export type CollectionIndexRule<T> = {
-    '.indexOn'?: CollectionIndexRuleDefinition<T>;
+    [ReservedKeys.indexOn]?: CollectionIndexRuleDefinition<T>;
 };
 
 export type CollectionEntityRuleDefinition<T> = LocationRuleDefinition | CollectionIndexRuleDefinition<T> | EntityRule<T>;
@@ -46,9 +83,11 @@ export type CollectionRule<T> = LocationRule<T> & CollectionIndexRule<T> & Colle
 
 export type RulesDefinition<T> = LocationRule<T> | PropertyRule<T> | EntityRule<T> | CollectionRule<T>;
 
-export type Rules = {
-    rules: RulesDefinition<any>;
-};
+export interface Rules<T> {
+
+    rules: RulesDefinition<T>;
+
+}
 
 // Rule variables
 
@@ -58,15 +97,15 @@ export type identity = 'email' | 'phone' | 'google.com' | 'facebook.com' | 'gith
 
 export interface AuthToken {
 
-    email: string;
+    email: StringValue;
 
-    email_verified: boolean;
+    email_verified: BooleanValue;
 
-    phone_number: string;
+    phone_number: StringValue;
 
-    name: string;
+    name: StringValue;
 
-    sub: string;
+    sub: StringValue;
 
     'firebase.identities': {
         [ key in identity ]: any[]
@@ -92,7 +131,7 @@ export interface Auth {
 
     provider: provider;
 
-    uid: string;
+    uid: StringValue;
 
     token: AuthToken;
 
@@ -102,7 +141,7 @@ export interface RuleVariables {
 
     auth: Auth;
 
-    now: number;
+    now: NumberValue;
 
     root: RuleDataSnapshot;
 
@@ -116,47 +155,27 @@ export interface RuleVariables {
 
 // Rule data snapshot
 
-export interface StringValue {
-
-    length: number;
-
-    contains(substring: string): boolean;
-
-    beginsWith(substring: string): boolean;
-
-    endsWith(substring: string): boolean;
-
-    replace(substring: string, replacement: string): StringValue;
-
-    toLowerCase(): StringValue;
-
-    toUpperCase(): StringValue;
-
-    matches(regex: string): boolean;
-
-}
-
 export interface RuleDataSnapshot {
 
-    val(): StringValue | number | boolean | null;
+    val(): StringValue | NumberValue | BooleanValue | NullValue;
 
     child(path: string): RuleDataSnapshot;
 
     parent(): RuleDataSnapshot;
 
-    hasChild(path: string): boolean;
+    hasChild(path: string): BooleanValue;
 
-    hasChildren(paths: string[]): boolean;
+    hasChildren(paths: string[]): BooleanValue;
 
-    exists(): boolean;
+    exists(): BooleanValue;
 
-    getPriority(): string | number | null;
+    getPriority(): StringValue | NumberValue | NullValue;
 
-    isNumber(): boolean;
+    isNumber(): BooleanValue;
 
-    isString(): boolean;
+    isString(): BooleanValue;
 
-    isBoolean(): boolean;
+    isBoolean(): BooleanValue;
 
 }
 
