@@ -2,9 +2,9 @@ import * as chai from 'chai';
 
 const expect = chai.expect;
 
-import { Rules, PropertyRule } from "../src/firebase-database-rules";
+import { Rules } from "../src/firebase-database-rules";
 import { Builder } from "../src/Builder";
-import { Check, check } from "../src/Check";
+import { check } from "../src/Check";
 import { ctx } from "../src/Context";
 import { path } from "../src/PathBuilder";
 
@@ -241,7 +241,7 @@ describe('Builder can build', () => {
             rules: {
                 "number": {
                     ".validate": check().condition(ctx().newData.isNumber())
-                        .and.greaterThan(ctx().newData.valAsNumber(), 0)
+                        .and.greaterThan(ctx().newData.valNumber(), 0)
                 }
             }
         };
@@ -264,7 +264,7 @@ describe('Builder can build', () => {
             rules: {
                 "string": {
                     ".validate": check().condition(ctx().newData.isString())
-                        .and.equal(ctx().newData.valAsString().length, 10)
+                        .and.equal(ctx().newData.valString().length, 10)
                 }
             }
         };

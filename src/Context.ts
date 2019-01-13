@@ -165,22 +165,22 @@ export class RuleDataSnapshotContext
         return new RuleDataSnapshotValue(this);
     }
 
-    valAsString() {
+    valString() {
         this.push(`val()`);
         return new RuleDataSnapshotStringValue(this);
     }
 
-    valAsNumber() {
+    valNumber() {
         this.push(`val()`);
         return new RuleDataSnapshotNumberValue(this);
     }
 
-    valAsBoolean() {
+    valBoolean() {
         this.push(`val()`);
         return new RuleDataSnapshotBooleanValue(this);
     }
 
-    valAsNull() {
+    valNull() {
         this.push(`val()`);
         return new RuleDataSnapshotNullValue(this);
     }
@@ -200,7 +200,7 @@ export class RuleDataSnapshotContext
         return new RuleDataSnapshotBooleanValue(this);
     }
 
-    hasChildren(paths: PathBuilder[]) {
+    hasChildren(paths?: PathBuilder[]) {
         this.push(`hasChildren(${paths ? '[' + paths + ']' : ''})`);
         return new RuleDataSnapshotBooleanValue(this);
     }
