@@ -126,8 +126,8 @@ describe('Builder can build', () => {
 
         expect(JSON.stringify(result)).to.be.equal(JSON.stringify({
             "rules": {
-                ".read": "auth!==null",
-                ".write": "auth!==null&&auth.provider==='password'"
+                ".read": "auth !== null",
+                ".write": "auth !== null && auth.provider === 'password'"
             }
         }));
     });
@@ -147,7 +147,7 @@ describe('Builder can build', () => {
         expect(JSON.stringify(result)).to.be.equal(JSON.stringify({
             "rules": {
                 ".read": "root.child('users').exists()",
-                ".write": "!root.child('users/'+auth.uid).exists()"
+                ".write": "!root.child('users/' + auth.uid).exists()"
             }
         }));
     });
@@ -171,7 +171,7 @@ describe('Builder can build', () => {
 
         expect(JSON.stringify(result)).to.be.equal(JSON.stringify({
             "rules": {
-                ".read": "root.child('permissions/users/'+auth.uid+'/status/lock').val()===false"
+                ".read": "root.child('permissions/users/' + auth.uid + '/status/lock').val() === false"
             }
         }));
     });
@@ -252,7 +252,7 @@ describe('Builder can build', () => {
         expect(JSON.stringify(result)).to.be.equal(JSON.stringify({
             "rules": {
                 "number": {
-                    ".validate": "newData.isNumber()&&newData.val()>0"
+                    ".validate": "newData.isNumber() && newData.val() > 0"
                 }
             }
         }));
@@ -275,7 +275,7 @@ describe('Builder can build', () => {
         expect(JSON.stringify(result)).to.be.equal(JSON.stringify({
             "rules": {
                 "string": {
-                    ".validate": "newData.isString()&&newData.val().length===10"
+                    ".validate": "newData.isString() && newData.val().length === 10"
                 }
             }
         }));

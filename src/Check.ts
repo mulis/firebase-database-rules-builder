@@ -1,89 +1,90 @@
-import { RulesDefinition } from './firebase-database-rules';
+import { RuleDataSnapshotValue } from './Context';
 
-export class Check<T> {
+declare type Expression = string | RuleDataSnapshotValue;
 
-    private _chain: string[];
+declare type Operand = null | boolean | number | string | RuleDataSnapshotValue;
 
-    constructor(public chain?: string[]) {
+declare type CheckInput = Expression | Operand | String;
+
+class Operators {
+
+    static and = new String(' && ');
+
+    static or = new String(' || ');
+
+    static not = new String('!');
+
+    static equal = new String(' === ');
+
+    static unequal = new String(' !== ');
+
+    static greaterThan  = new String(' > ');
+
+    static greaterThanOrEqualTo  = new String(' >= ');
+
+    static lessThan  = new String(' < ');
+
+    static lessThanOrEqualTo  = new String(' <= ');
+
+}
+
+export class Check {
+
+    private _chain: CheckInput[];
+
+    constructor(chain?: CheckInput[]) {
         this._chain = chain || [];
     }
 
-    get add() {
-        this._chain.push(' + ');
+    private push(...input: CheckInput[]) {
+        this._chain.push(...input);
         return this;
     }
 
-    get subtract() {
-        this._chain.push(' - ');
-        return this;
-    }
-
-    get negate() {
-        this._chain.push('-');
-        return this;
-    }
-
-    get not() {
-        this._chain.push('!');
-        return this;
+    condition(expression: Expression) {
+        return this.push(expression);
     }
 
     get and() {
-        this._chain.push('&&');
-        return this;
+        return this.push(Operators.and);
     }
 
-    private addBinaryOperation(expression: any, result: any, operator: string) {
-        this._chain.push(expression);
-        this._chain.push(operator);
-        this._chain.push(result);
-        return this;
+    get or() {
+        return this.push(Operators.or);
     }
 
-    equal(expression: any, result: any) {
-        if (typeof result === 'string') {
-            result = `'${result}'`;
-        }
-        return this.addBinaryOperation(expression, result, '===');
+    get not() {
+        return this.push(Operators.not);
     }
 
-    unequal(expression: any, result: any) {
-        if (typeof result === 'string') {
-            result = `'${result}'`;
-        }
-        return this.addBinaryOperation(expression, result, '!==');
+    equal(left: Operand, right: Operand) {
+        return this.push(left, Operators.equal, right);
     }
 
-    greaterThan(expression: any, result: number) {
-        return this.addBinaryOperation(expression, result, '>');
+    unequal(left: Operand, right: Operand) {
+        return this.push(left, Operators.unequal, right);
     }
 
-    greaterThanOrEqualTo(expression: any, result: number) {
-        return this.addBinaryOperation(expression, result, '>=');
+    greaterThan(left: Operand, right: number) {
+        return this.push(left, Operators.greaterThan, right);
     }
 
-    lessThan(expression: any, result: number) {
-        return this.addBinaryOperation(expression, result, '<');
+    greaterThanOrEqualTo(left: Operand, right: number) {
+        return this.push(left, Operators.greaterThanOrEqualTo, right);
     }
 
-    lessThanOrEqualTo(expression: any, result: number) {
-        return this.addBinaryOperation(expression, result, '<=');
+    lessThan(left: Operand, right: number) {
+        return this.push(left, Operators.lessThan, right);
     }
 
-    condition(expression: any) {
-        this._chain.push(expression);
-        return this;
-    }
-
-    scope(expression: any) {
-        this._chain.push('(');
-        this._chain.push(expression);
-        this._chain.push(')');
-        return this;
+    lessThanOrEqualTo(left: Operand, right: number) {
+        return this.push(left, Operators.lessThanOrEqualTo, right);
     }
 
     toString() {
-        return this._chain.map(item => '' + item).join('');
+        return this._chain
+            .map(v => typeof v === 'string' ? `'${v}'` : '' + v)
+            .join('');
     }
 
 }
