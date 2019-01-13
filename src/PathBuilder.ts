@@ -84,7 +84,7 @@ export class PathBuilder {
                     part = `${isAfterStatic ? "" : "'"}${ isFirst ? "" : "/" }${ value }${ isLast ? "" : "/" }'`;
 
                 } else if (path.type === PathType.DYNAMIC_PATH) {
-                    part = `+${ path.value }${ isLast ? "" : "+" }`;
+                    part = `${ isFirst ? "" : " + "}${ path.value }${ isLast ? "" : " + " }`;
                 }
 
                 return result + part;
