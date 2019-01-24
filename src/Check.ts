@@ -1,32 +1,10 @@
-import { RuleDataSnapshotValue } from './Context';
+import {
+    Token,
+    Operators,
+    Expression
+} from './Operation';
 
-declare type Expression = string | RuleDataSnapshotValue;
-
-declare type Operand = null | boolean | number | string | RuleDataSnapshotValue;
-
-declare type CheckInput = Expression | Operand | String;
-
-class Operators {
-
-    static and = new String(' && ');
-
-    static or = new String(' || ');
-
-    static not = new String('!');
-
-    static equal = new String(' === ');
-
-    static unequal = new String(' !== ');
-
-    static greaterThan  = new String(' > ');
-
-    static greaterThanOrEqualTo  = new String(' >= ');
-
-    static lessThan  = new String(' < ');
-
-    static lessThanOrEqualTo  = new String(' <= ');
-
-}
+export type CheckInput = Expression | Token;
 
 export class Check {
 
@@ -57,28 +35,32 @@ export class Check {
         return this.push(Operators.not);
     }
 
-    equal(left: Operand, right: Operand) {
+    equal(left: Expression, right: Expression) {
         return this.push(left, Operators.equal, right);
     }
 
-    unequal(left: Operand, right: Operand) {
+    unequal(left: Expression, right: Expression) {
         return this.push(left, Operators.unequal, right);
     }
 
-    greaterThan(left: Operand, right: number) {
+    greaterThan(left: Expression, right: number) {
         return this.push(left, Operators.greaterThan, right);
     }
 
-    greaterThanOrEqualTo(left: Operand, right: number) {
+    greaterThanOrEqualTo(left: Expression, right: number) {
         return this.push(left, Operators.greaterThanOrEqualTo, right);
     }
 
-    lessThan(left: Operand, right: number) {
+    lessThan(left: Expression, right: number) {
         return this.push(left, Operators.lessThan, right);
     }
 
-    lessThanOrEqualTo(left: Operand, right: number) {
+    lessThanOrEqualTo(left: Expression, right: number) {
         return this.push(left, Operators.lessThanOrEqualTo, right);
+    }
+
+    ternary(condition: Expression, truthy: Expression, falsy: Expression) {
+        return this.push(condition, Operators.ternaryQuestion, truthy, Operators.ternaryColon, falsy);
     }
 
     toString() {
