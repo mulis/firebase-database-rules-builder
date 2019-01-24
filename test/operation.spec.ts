@@ -2,8 +2,6 @@ import * as chai from 'chai';
 
 const expect = chai.expect;
 
-import { check } from '../src/Check';
-
 import {
     add,
     subtract,
@@ -18,7 +16,7 @@ import {
 describe('Expression produces correct string', () => {
 
     it('while add two strings', () => {
-        expect(add(1, 1).toString()).to.be.equal("1 + 1");
+        expect(add('1', '1').toString()).to.be.equal("'1' + '1'");
     });
 
     it('while add two numbers', () => {

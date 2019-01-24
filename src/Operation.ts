@@ -5,47 +5,21 @@ import {
     RuleDataSnapshotStringValue
 } from './Context';
 
-declare type NullExpression = null | RuleDataSnapshotNullValue | Operation;
+export type NullExpression = Operation | RuleDataSnapshotNullValue | null;
 
-declare type BooleanExpression = boolean | RuleDataSnapshotBooleanValue | Operation;
+export type BooleanExpression = Operation | RuleDataSnapshotBooleanValue | boolean;
 
-declare type NumberExpression = number | RuleDataSnapshotNumberValue | Operation;
+export type NumberExpression = Operation | RuleDataSnapshotNumberValue | number;
 
-declare type StringExpression = string | RuleDataSnapshotStringValue | Operation;
+export type StringExpression = Operation | RuleDataSnapshotStringValue | string;
 
-declare type Expression = NullExpression | BooleanExpression | NumberExpression | StringExpression;
+export type Expression = NullExpression | BooleanExpression | NumberExpression | StringExpression;
 
-declare type OperationInput = Expression | Operation | String;
+export class Token extends String { }
 
-class Operators {
+export type OperationInput = Expression | Token;
 
-    static negate = new String('-');
-
-    static add = new String(' + ');
-
-    static subtract = new String(' - ');
-
-    static multiply = new String(' * ');
-
-    static divide = new String(' / ');
-
-    static modulus  = new String(' % ');
-
-    static ternaryQuestion  = new String(' ? ');
-
-    static ternaryColon  = new String(' : ');
-
-}
-
-class Symbols {
-
-    static parenthesisLeft = new String('(');
-
-    static parenthesisRigth = new String(')');
-
-}
-
-class Operation {
+export class Operation {
 
     private _chain: OperationInput[] = [];
 
@@ -58,6 +32,60 @@ class Operation {
             .map(v => typeof v === 'string' ? `'${v}'` : v)
             .join('');
     }
+}
+
+export class Operators {
+
+    static negate = new Token('-');
+
+    static add = new Token(' + ');
+
+    static subtract = new Token(' - ');
+
+    static multiply = new Token(' * ');
+
+    static divide = new Token(' / ');
+
+    static modulus  = new Token(' % ');
+
+    static ternaryQuestion  = new Token(' ? ');
+
+    static ternaryColon  = new Token(' : ');
+
+    static and = new Token(' && ');
+
+    static or = new Token(' || ');
+
+    static not = new Token('!');
+
+    static equal = new Token(' === ');
+
+    static unequal = new Token(' !== ');
+
+    static greaterThan  = new Token(' > ');
+
+    static greaterThanOrEqualTo  = new Token(' >= ');
+
+    static lessThan  = new Token(' < ');
+
+    static lessThanOrEqualTo  = new Token(' <= ');
+
+}
+
+export class Symbols {
+
+    static parenthesisLeft = new Token('(');
+
+    static parenthesisRigth = new Token(')');
+
+}
+
+export function scope(expression: Expression) {
+    return new Operation(Symbols.parenthesisLeft, expression, Symbols.parenthesisRigth);
+}
+
+export function negate(expression: Expression) {
+    return new Operation(Operators.negate, expression);
 }
 
 export function add(left: NumberExpression | StringExpression, right: NumberExpression | StringExpression) {
@@ -80,14 +108,42 @@ export function modulus(left: NumberExpression, right: NumberExpression) {
     return new Operation(left, Operators.modulus, right);
 }
 
-export function scope(expression: Expression) {
-    return new Operation(Symbols.parenthesisLeft, expression, Symbols.parenthesisRigth);
-}
-
-export function negate(expression: Expression) {
-    return new Operation(Operators.negate, expression);
-}
-
 export function ternary(condition: BooleanExpression, truthy: Expression, falsy: Expression) {
     return new Operation(condition, Operators.ternaryQuestion, truthy, Operators.ternaryColon, falsy);
+}
+
+export function and(left: BooleanExpression, right: BooleanExpression) {
+    return new Operation(left, Operators.and, right);
+}
+
+export function or(left: BooleanExpression, right: BooleanExpression) {
+    return new Operation(left, Operators.or, right);
+}
+
+export function not(right: BooleanExpression) {
+    return new Operation(Operators.not, right);
+}
+
+export function equal(left: BooleanExpression, right: BooleanExpression) {
+    return new Operation(left, Operators.equal, right);
+}
+
+export function unequal(left: BooleanExpression, right: BooleanExpression) {
+    return new Operation(left, Operators.unequal, right);
+}
+
+export function greaterThan(left: NumberExpression, right: NumberExpression) {
+    return new Operation(left, Operators.greaterThan, right);
+}
+
+export function greaterThanOrEqualTo(left: NumberExpression, right: NumberExpression) {
+    return new Operation(left, Operators.greaterThanOrEqualTo, right);
+}
+
+export function lessThan(left: NumberExpression, right: NumberExpression) {
+    return new Operation(left, Operators.lessThan, right);
+}
+
+export function lessThanOrEqualTo(left: NumberExpression, right: NumberExpression) {
+    return new Operation(left, Operators.lessThanOrEqualTo, right);
 }
