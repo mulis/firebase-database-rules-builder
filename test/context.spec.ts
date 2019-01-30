@@ -3,15 +3,15 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import {
-    ctx,
     RuleDataSnapshotContext,
     RuleDataSnapshotValue,
     RuleDataSnapshotNullValue,
     RuleDataSnapshotBooleanValue,
     RuleDataSnapshotNumberValue,
-    RuleDataSnapshotStringValue
-} from "../src/Context";
-import { path } from "../src/PathBuilder";
+    RuleDataSnapshotStringValue,
+    ctx,
+    path
+} from "../lib";
 
 describe('Context produces correct string', () => {
 

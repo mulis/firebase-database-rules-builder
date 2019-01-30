@@ -1,11 +1,5 @@
 // Common
 
-type Keys<T> = keyof T;
-
-type Partial<T> = {
-    [P in keyof T]?: T[P];
-}
-
 export type Collection<T> = {
     [ key: string ]: {
         [ P in keyof T]: T[P];

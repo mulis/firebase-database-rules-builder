@@ -11,7 +11,7 @@ import {
     scope,
     negate,
     ternary
-} from "../src/Operation";
+} from "../lib";
 
 describe('Expression produces correct string', () => {
 

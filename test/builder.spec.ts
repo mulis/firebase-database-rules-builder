@@ -2,11 +2,13 @@ import * as chai from 'chai';
 
 const expect = chai.expect;
 
-import { Rules } from "../src/firebase-database-rules";
-import { Builder } from "../src/Builder";
-import { check } from "../src/Check";
-import { ctx } from "../src/Context";
-import { path } from "../src/PathBuilder";
+import {
+    Rules,
+    Builder,
+    check,
+    ctx,
+    path
+} from '../lib';
 
 describe('Builder can build', () => {
 

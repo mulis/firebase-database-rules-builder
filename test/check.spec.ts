@@ -2,9 +2,11 @@ import * as chai from 'chai';
 
 const expect = chai.expect;
 
-import { check } from '../src/Check';
-import { ctx } from '../src/Context';
-import { add } from '../src/Operation'
+import {
+    check,
+    ctx,
+    add
+} from '../lib';
 
 describe('Check produces correct string with', () => {
 

@@ -2,8 +2,14 @@
     "name": "firebase-database-rules-builder",
     "version": "0.0.1",
     "description": "",
-    "main": "index.js",
+    "main": "lib/index.js",
+    "files": [
+        "lib/*.js",
+        "lib/*.d.ts",
+        "package.json"
+    ],
     "scripts": {
+        "prepare": "tsc",
         "tsc": "npx tsc",
         "tsc:w": "npx tsc -w",
         "test": "npx mocha --require ts-node/register test/**/*.spec.ts",
@@ -12,14 +18,14 @@
     "author": "muliserg",
     "license": "ISC",
     "dependencies": {
-        "typescript": "latest",
-        "ts-node": "latest"
     },
     "devDependencies": {
         "@types/chai": "latest",
         "@types/mocha": "latest",
         "chai": "latest",
         "mocha": "latest",
-        "tsc-watch": "latest"
+        "ts-node": "latest",
+        "tsc-watch": "latest",
+        "typescript": "latest"
     }
 }

@@ -124,11 +124,11 @@ export function not(right: BooleanExpression) {
     return new Operation(Operators.not, right);
 }
 
-export function equal(left: BooleanExpression, right: BooleanExpression) {
+export function equal(left: Expression, right: Expression) {
     return new Operation(left, Operators.equal, right);
 }
 
-export function unequal(left: BooleanExpression, right: BooleanExpression) {
+export function unequal(left: Expression, right: Expression) {
     return new Operation(left, Operators.unequal, right);
 }
 

@@ -18,7 +18,7 @@ export class Builder<T> {
 
     }
 
-    private resolve(value: any) {
+    private resolve (value: any) {
 
         let result: any = null;
 
@@ -36,7 +36,7 @@ export class Builder<T> {
 
     }
 
-    private resolveObject(obj: any) {
+    private resolveObject (obj: any) {
 
         let result: any = {};
 

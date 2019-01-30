@@ -1,6 +1,4 @@
-import * as chai from 'chai';
-
-import { CollectionRule } from '../src/firebase-database-rules';
+import { CollectionRule } from '../lib';
 
 class User {
 
