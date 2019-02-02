@@ -8,6 +8,7 @@ import {
     NumberValue,
     StringValue
 } from './firebase-database-rules';
+import { Token, Operators, Symbols, Operation, Expression } from './Operation';
 import { PathBuilder } from './PathBuilder';
 
 type ContextType<T> = {
@@ -20,220 +21,355 @@ type ContextType<T> = {
         | ((...args: any[]) => RuleDataSnapshotValue)
 };
 
-export class ContextBase {
+export class Member extends String { }
 
-    private chain: string[];
+declare type ContextInput = Context | Member | Token | Expression;
 
-    constructor(context?: ContextBase) {
-        this.chain = context ? context.chain : [];
+export class Context {
+
+    private chain: ContextInput[];
+
+    constructor(context?: Context) {
+
+        this.chain = [];
+
+        if (context) {
+            Context.push(this, context);
+        }
     }
 
-    protected push(link: string) {
-        this.chain.push(link);
+    static push(context: Context, input: ContextInput) {
+        context.chain.push(input);
+    }
+
+    static spawn(context: Context, input: ContextInput) {
+        let newContext = new Context(context);
+        newContext.chain.push(input);
+        return newContext;
+    }
+
+    static unwrap(context: Context) {
+        let result: ContextInput[] = [];
+        context.chain.forEach(value => {
+            if (value instanceof Context) {
+                result = result.concat(Context.unwrap(value));
+            } else {
+                result = result.concat(value);
+            }
+        });
+        return result;
     }
 
     toString() {
-        return this.chain.join('.');
+        return Context.unwrap(this).reduce<string>((result, value, index, chain) => {
+            if (value instanceof Context) {
+                result += value.toString();
+            } else if (value instanceof Member) {
+                let previousIsMember = (chain[index - 1] instanceof Member);
+                result += `${ previousIsMember && index > 0 ? '.' : '' }${ value }`;
+            } else if (value instanceof Token) {
+                result += value.toString();
+            } else {
+                result += typeof value === 'string' ? `'${value}'` : new String(value);
+            }
+            return result;
+        }, '');
     }
 
 }
 
 export class RuleVariablesContext
-    extends ContextBase
+    extends Context
     implements ContextType<RuleVariables> {
 
+    // Firebase variables
+
     get auth() {
-        this.push(`auth`);
-        return new AuthContext(this);
+        let context = Context.spawn(this, new Member(`auth`));
+        return new AuthContext(context);
     }
 
     get now() {
-        this.push(`now`);
+        Context.push(this, new Member(`now`));
         return new RuleDataSnapshotNumberValue(this);
     }
 
     get root() {
-        this.push(`root`);
-        return new RuleDataSnapshotContext(this);
+        let context = Context.spawn(this, new Member(`root`));
+        return new RuleDataSnapshotContext(context);
     }
 
     get data() {
-        this.push(`data`);
-        return new RuleDataSnapshotContext(this);
+        let context = Context.spawn(this, new Member(`data`));
+        return new RuleDataSnapshotContext(context);
     }
 
     get newData() {
-        this.push(`newData`);
-        return new RuleDataSnapshotContext(this);
+        let context = Context.spawn(this, new Member(`newData`));
+        return new RuleDataSnapshotContext(context);
+    }
+
+    // Chaining properties and methods
+
+    get not() {
+        let context = new Context(this);
+         Context.push(context, Operators.not);
+        return new RuleVariablesContext(context);
+    }
+
+    get negate() {
+        let context = new Context(this);
+         Context.push(context, Operators.negate);
+        return new RuleVariablesContext(context);
+    }
+
+    evaluate(expression: Expression) {
+        let context = new Context(this);
+        Context.push(context, expression);
+        return new RuleDataSnapshotValue(context);
+    }
+
+    scope(expression: Expression) {
+        let context = new Context(this);
+        Context.push(context, Symbols.parenthesisLeft);
+        Context.push(context, expression);
+        Context.push(context, Symbols.parenthesisRigth);
+        return new RuleDataSnapshotValue(context);
     }
 
 }
 
 export class AuthContext
-    extends ContextBase
+    extends Context
     implements ContextType<Auth> {
 
     get provider() {
-        this.push(`provider`);
-        return new RuleDataSnapshotValue(this);
+        let context = Context.spawn(this, new Member(`provider`));
+        return new RuleDataSnapshotValue(context);
     }
 
     get uid() {
-        this.push(`uid`);
-        return new RuleDataSnapshotValue(this);
+        let context = Context.spawn(this, new Member(`uid`));
+        return new RuleDataSnapshotValue(context);
     }
 
     get token() {
-        this.push(`token`);
-        return new AuthTokenContext(this);
+        let context = Context.spawn(this, new Member(`token`));
+        return new AuthTokenContext(context);
     }
 
 }
 
 export class AuthTokenContext
-    extends ContextBase
+    extends Context
     implements ContextType<AuthToken> {
 
     get email() {
-        this.push(`email`);
+        Context.push(this, new Member(`email`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     get email_verified() {
-        this.push(`email_verified`);
+        Context.push(this, new Member(`email_verified`));
         return new RuleDataSnapshotBooleanValue(this);
     }
 
     get phone_number() {
-        this.push(`phone_number`);
+        Context.push(this, new Member(`phone_number`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     get name() {
-        this.push(`name`);
+        Context.push(this, new Member(`name`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     get sub() {
-        this.push(`sub`);
+        Context.push(this, new Member(`sub`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     get 'firebase.identities'() {
-        this.push(`firebase.identities`);
+        Context.push(this, new Member(`firebase.identities`));
         return new RuleDataSnapshotStringValue(this); // TODO
     }
 
     get 'firebase.sign_in_provider'() {
-        this.push(`firebase.sign_in_provider`);
+        Context.push(this, new Member(`firebase.sign_in_provider`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     get iss() {
-        this.push(`iss`);
+        Context.push(this, new Member(`iss`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     get aud() {
-        this.push(`aud`);
+        Context.push(this, new Member(`aud`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     get auth_time() {
-        this.push(`auth_time`);
+        Context.push(this, new Member(`auth_time`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     get iat() {
-        this.push(`iat`);
+        Context.push(this, new Member(`iat`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     get exp() {
-        this.push(`exp`);
+        Context.push(this, new Member(`exp`));
         return new RuleDataSnapshotStringValue(this);
     }
 
 }
 
 export class RuleDataSnapshotContext
-    extends ContextBase
+    extends Context
     implements ContextType<RuleDataSnapshot> {
 
     val() {
-        this.push(`val()`);
-        return new RuleDataSnapshotValue(this);
+        let context = Context.spawn(this, new Member(`val()`));
+        return new RuleDataSnapshotValue(context);
     }
 
     valString() {
-        this.push(`val()`);
-        return new RuleDataSnapshotStringValue(this);
+        let context = Context.spawn(this, new Member(`val()`));
+        return new RuleDataSnapshotStringValue(context);
     }
 
     valNumber() {
-        this.push(`val()`);
-        return new RuleDataSnapshotNumberValue(this);
+        let context = Context.spawn(this, new Member(`val()`));
+        return new RuleDataSnapshotNumberValue(context);
     }
 
     valBoolean() {
-        this.push(`val()`);
-        return new RuleDataSnapshotBooleanValue(this);
+        let context = Context.spawn(this, new Member(`val()`));
+        return new RuleDataSnapshotBooleanValue(context);
     }
 
     valNull() {
-        this.push(`val()`);
-        return new RuleDataSnapshotNullValue(this);
+        let context = Context.spawn(this, new Member(`val()`));
+        return new RuleDataSnapshotNullValue(context);
     }
 
     child(path: PathBuilder) {
-        this.push(`child(${path})`);
-        return new RuleDataSnapshotContext(this);
+        let context = Context.spawn(this, new Member(`child(${path})`))
+        return new RuleDataSnapshotContext(context);
     }
 
     parent() {
-        this.push(`parent()`);
-        return new RuleDataSnapshotContext(this);
+        let context = Context.spawn(this, new Member(`parent()`))
+        return new RuleDataSnapshotContext(context);
     }
 
     hasChild(path: PathBuilder) {
-        this.push(`hasChild(${path})`);
-        return new RuleDataSnapshotBooleanValue(this);
+        let context = Context.spawn(this, new Member(`hasChild(${path})`));
+        return new RuleDataSnapshotBooleanValue(context);
     }
 
     hasChildren(paths?: PathBuilder[]) {
-        this.push(`hasChildren(${paths ? '[' + paths + ']' : ''})`);
-        return new RuleDataSnapshotBooleanValue(this);
+        let context = Context.spawn(this, new Member(`hasChildren(${paths ? '[' + paths + ']' : ''})`));
+        return new RuleDataSnapshotBooleanValue(context);
     }
 
     exists() {
-        this.push(`exists()`);
-        return new RuleDataSnapshotBooleanValue(this);
+        let context = Context.spawn(this, new Member(`exists()`));
+        return new RuleDataSnapshotBooleanValue(context);
     }
 
     getPriority() {
-        this.push(`getPriority()`);
-        return new RuleDataSnapshotValue(this);
+        let context = Context.spawn(this, new Member(`getPriority()`));
+        return new RuleDataSnapshotValue(context);
     }
 
     isNumber() {
-        this.push(`isNumber()`);
-        return new RuleDataSnapshotBooleanValue(this);
+        let context = Context.spawn(this, new Member(`isNumber()`));
+        return new RuleDataSnapshotBooleanValue(context);
     }
 
     isString() {
-        this.push(`isString()`);
-        return new RuleDataSnapshotBooleanValue(this);
+        let context = Context.spawn(this, new Member(`isString()`));
+        return new RuleDataSnapshotBooleanValue(context);
     }
 
     isBoolean() {
-        this.push(`isBoolean()`);
-        return new RuleDataSnapshotBooleanValue(this);
+        let context = Context.spawn(this, new Member(`isBoolean()`));
+        return new RuleDataSnapshotBooleanValue(context);
     }
 
 }
 
 export class RuleDataSnapshotValue
-    extends ContextBase {
+    extends Context {
+
+    get equal() {
+        Context.push(this, Operators.equal);
+        return new RuleVariablesContext(this);
+    }
+
+    get unequal() {
+        Context.push(this, Operators.unequal);
+        return new RuleVariablesContext(this);
+    }
+
+    get and() {
+        Context.push(this, Operators.and);
+        return new RuleVariablesContext(this);
+    }
+
+    get or() {
+        Context.push(this, Operators.or);
+        return new RuleVariablesContext(this);
+    }
+
+    get greaterThan() {
+        Context.push(this, Operators.greaterThan);
+        return new RuleVariablesContext(this);
+    }
+
+    get greaterThanOrEqualTo() {
+        Context.push(this, Operators.greaterThanOrEqualTo);
+        return new RuleVariablesContext(this);
+    }
+
+    get lessThan() {
+        Context.push(this, Operators.lessThan);
+        return new RuleVariablesContext(this);
+    }
+
+    get lessThanOrEqualTo() {
+        Context.push(this, Operators.lessThanOrEqualTo);
+        return new RuleVariablesContext(this);
+    }
+
+    get add() {
+        Context.push(this, Operators.add);
+        return new RuleVariablesContext(this);
+    }
+
+    get subtract() {
+        Context.push(this, Operators.subtract);
+        return new RuleVariablesContext(this);
+    }
+
+    get multiply() {
+        Context.push(this, Operators.multiply);
+        return new RuleVariablesContext(this);
+    }
+
+    get divide() {
+        Context.push(this, Operators.divide);
+        return new RuleVariablesContext(this);
+    }
+
+    get modulus() {
+        Context.push(this, Operators.modulus);
+        return new RuleVariablesContext(this);
+    }
+
 }
 
 export class RuleDataSnapshotNullValue
@@ -256,42 +392,42 @@ export class RuleDataSnapshotStringValue
     implements StringValue {
 
     get length() {
-        this.push(`length`);
+        Context.push(this, new Member(`length`));
         return new RuleDataSnapshotNumberValue(this);
     }
 
     contains(substring: string) {
-        this.push(`contains('${substring}')`);
+        Context.push(this, new Member(`contains('${substring}')`));
         return new RuleDataSnapshotBooleanValue(this);
     }
 
     beginsWith(substring: string) {
-        this.push(`beginsWith('${substring}')`);
+        Context.push(this, new Member(`beginsWith('${substring}')`));
         return new RuleDataSnapshotBooleanValue(this);
     }
 
     endsWith(substring: string) {
-        this.push(`endsWith('${substring}')`);
+        Context.push(this, new Member(`endsWith('${substring}')`));
         return new RuleDataSnapshotBooleanValue(this);
     }
 
     replace(substring: string, replacement: string) {
-        this.push(`replace('${substring}','${replacement}')`);
+        Context.push(this, new Member(`replace('${substring}','${replacement}')`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     toLowerCase() {
-        this.push(`toLowerCase()`);
+        Context.push(this, new Member(`toLowerCase()`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     toUpperCase() {
-        this.push(`toUpperCase()`);
+        Context.push(this, new Member(`toUpperCase()`));
         return new RuleDataSnapshotStringValue(this);
     }
 
     matches(regex: string) {
-        this.push(`matches(${regex})`);
+        Context.push(this, new Member(`matches(${regex})`));
         return new RuleDataSnapshotBooleanValue(this);
     }
 
@@ -300,3 +436,17 @@ export class RuleDataSnapshotStringValue
 export function ctx () {
     return new RuleVariablesContext();
 }
+
+let auth = (new RuleVariablesContext()).auth;
+let now = (new RuleVariablesContext()).now;
+let data = (new RuleVariablesContext()).data;
+let newData = (new RuleVariablesContext()).newData;
+let root = (new RuleVariablesContext()).root;
+
+export {
+    auth,
+    now,
+    root,
+    data,
+    newData
+ };

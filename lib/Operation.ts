@@ -29,7 +29,7 @@ export class Operation {
 
     toString() {
         return this._chain
-            .map(v => typeof v === 'string' ? `'${v}'` : v)
+            .map(value => typeof value === 'string' ? `'${value}'` : value)
             .join('');
     }
 }
