@@ -1,50 +1,72 @@
-import { CollectionRule } from '../lib';
+import * as chai from 'chai';
 
-class User {
+const expect = chai.expect;
 
-    id?: number;
+import {
+    CollectionRule,
+    ctx
+} from '../lib';
 
-    name?: string;
-
-}
+import { User, Relative } from './common.spec';
 
 describe('Collection rule definition', () => {
 
     it('work with location', () => {
 
         let users: CollectionRule<User> = {
-            ".validate": true
+            ".validate": true,
+            "$id": {
+                name: 'ame'
+            }
         };
+
+        expect(users).to.exist;
 
     });
 
     it('work with index', () => {
 
         let users: CollectionRule<User> = {
-            ".indexOn": [ "id" ]
+            ".indexOn": [ "name" ]
         };
+
+        expect(users).to.exist;
+
+    });
+
+    it('work with index on value', () => {
+
+        let users: CollectionRule<User> = {
+            ".indexOn": ".value"
+        };
+
+        expect(users).to.exist;
 
     });
 
     it('work with entity location', () => {
 
         let users: CollectionRule<User> = {
-            "$user": {
+            "$id": {
                 ".validate": true
             }
         };
+
+        expect(users).to.exist;
 
     });
 
     it('work with entity property', () => {
 
         let users: CollectionRule<User> = {
-            "$user": {
-                "id": {
+            "$id": {
+                "name": {
                     ".validate": true
                 }
             }
         };
+
+        expect(users).to.exist;
 
     });
 
@@ -54,17 +76,63 @@ describe('Collection rule definition', () => {
 
             ".validate": true,
 
-            ".indexOn": [ "id" ],
+            ".indexOn": [ "name" ],
 
-            "$user": {
+            "$id": {
 
                 ".validate": true,
 
-                "id": {
+                "name": {
                     ".validate": true
+                },
+
+                "$other": {
+                    ".validate": false
+                }
+
+            }
+        };
+
+        expect(users).to.exist;
+
+    });
+
+    it('work with data context', () => {
+
+        let users: CollectionRule<User> = {
+            ".read": true,
+            ".write": ctx().not.auth.provider.equal.evaluate('anonymous'),
+            "$id": {
+                ".validate": ctx().not.data.exists(),
+                name: {
+                    ".validate": ctx().newData.isString().and.newData.valString().length.lessThan.evaluate(100)
                 }
             }
         };
+
+        expect(users).to.exist;
+
+    });
+
+    it('work with nested collection', () => {
+
+        let users: CollectionRule<User> = {
+            ".read": true,
+            ".write": ctx().not.auth.provider.equal.evaluate('anonymous'),
+            "$id": {
+                ".validate": ctx().not.data.exists(),
+                name: {
+                    ".validate": ctx().newData.isString().and.newData.valString().length.lessThan.evaluate(100)
+                },
+                relatives: <CollectionRule<{ "$relative_id": Relative }>> {
+                    "$relative_id": {
+                        ".validate": ctx().root.hasChild("users/ + $relative_id")
+                    }
+                }
+            }
+        };
+
+        expect(users).to.exist;
 
     });
 

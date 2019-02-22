@@ -1,18 +1,24 @@
 // Common
 
+export type Keys<T> = keyof T;
+
 export type Collection<T> = {
     [ key: string ]: {
-        [ P in keyof T]: T[P];
+        [ K in Keys<T>]: T[K];
     }
 }
 
-export interface NullValue { }
+export type Primitive = string | number | boolean | null;
 
-export interface BooleanValue { }
+export interface Value { }
 
-export interface NumberValue { }
+export interface NullValue extends Value { }
 
-export interface StringValue {
+export interface BooleanValue extends Value { }
+
+export interface NumberValue extends Value { }
+
+export interface StringValue extends Value {
 
     length: NumberValue;
 
@@ -39,43 +45,61 @@ export enum ReservedKeys {
     write = '.write',
     validate = '.validate',
     indexOn = '.indexOn',
+    id = '$id',
+    location = '$location',
+    other = '$other'
 }
 
 export enum ReservedValues {
-    value = '.value',
+    value = '.value'
 }
 
-export type LocationRuleDefinition = BooleanValue | StringValue;
+export type ReservedIndexOnValue = '.value';
 
-export type LocationRule<T> = {
-    [ReservedKeys.read]?: LocationRuleDefinition;
-    [ReservedKeys.write]?: LocationRuleDefinition;
-    [ReservedKeys.validate]?: LocationRuleDefinition;
+export type AccessRuleDefinition = Primitive | Value | BooleanValue | StringValue;
+
+export type AccessRule = {
+    [ ReservedKeys.read ]?: AccessRuleDefinition;
+    [ ReservedKeys.write ]?: AccessRuleDefinition;
+    [ ReservedKeys.validate ]?: AccessRuleDefinition;
 };
 
-export type PropertyRuleDefinition<T> = LocationRule<T> | EntityRule<T> | CollectionRule<T>;
+export type LocationRule = {
+    [ ReservedKeys.location ]?: AccessRule;
+    [ ReservedKeys.other ]?: AccessRule;
+};
+
+export type PropertyRuleDefinition<T> =
+    T extends Primitive ?
+        AccessRule | T :
+        AccessRule | EntityRule<T> | CollectionRule<T>;
 
 export type PropertyRule<T> = {
-    [ P in keyof T ]: PropertyRuleDefinition<T[P]>;
+    [ K in Keys<T> ]: PropertyRuleDefinition<T[K]>;
 };
 
-export type EntityRule<T> = LocationRule<T> & PropertyRule<T>;
+export type EntityRule<T> = AccessRule & LocationRule & PropertyRule<T>;
 
-export type CollectionIndexRuleDefinition<T> = (keyof T)[] | ReservedValues.value;
+export type CollectionIndexRuleDefinition<T> = Keys<T>[] | ReservedIndexOnValue;
 
 export type CollectionIndexRule<T> = {
-    [ReservedKeys.indexOn]?: CollectionIndexRuleDefinition<T>;
+    [ ReservedKeys.indexOn ]?: CollectionIndexRuleDefinition<T>;
 };
-
-export type CollectionEntityRuleDefinition<T> = LocationRuleDefinition | CollectionIndexRuleDefinition<T> | EntityRule<T>;
 
 export type CollectionEntityRule<T> = {
-    [ key: string ]: CollectionEntityRuleDefinition<T>;
+    [ ReservedKeys.id ]?: EntityRule<T>;
 };
 
-export type CollectionRule<T> = LocationRule<T> & CollectionIndexRule<T> & CollectionEntityRule<T>;
+export type CollectionEntityWithIdRule<T> = {
+    [ K in Keys<T> ]?: EntityRule<T[K]>;
+}
 
-export type RulesDefinition<T> = LocationRule<T> | PropertyRule<T> | EntityRule<T> | CollectionRule<T>;
+export type CollectionRule<T> =
+    AccessRule
+    & CollectionIndexRule<T>
+    & (CollectionEntityRule<T> | CollectionEntityWithIdRule<T> );
+
+export type RulesDefinition<T> = EntityRule<T> | CollectionRule<T>;
 
 export interface Rules<T> {
 
@@ -142,8 +166,6 @@ export interface RuleVariables {
     data: RuleDataSnapshot;
 
     newData: RuleDataSnapshot;
-
-    // [ location: string ]: string;
 
 }
 

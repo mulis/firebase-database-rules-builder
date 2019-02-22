@@ -1,39 +1,10 @@
-import {
-    Collection,
-    EntityRule,
-    PropertyRule,
-    CollectionRule
-} from '../lib';
+import * as chai from 'chai';
 
-interface Permissions {
+const expect = chai.expect;
 
-    read: boolean;
+import { EntityRule } from '../lib';
 
-    write: boolean;
-
-}
-
-interface Relative {
-
-    id: number;
-
-    name?: string;
-
-    status?: number;
-
-}
-
-interface User {
-
-    id?: number;
-
-    name?: string;
-
-    permissions?: Permissions;
-
-    relatives?: Collection<Relative>;
-
-}
+import { User } from './common.spec';
 
 describe('Entity rule definition', () => {
 
@@ -42,6 +13,8 @@ describe('Entity rule definition', () => {
         let user: EntityRule<User> = {
             ".validate": true
         };
+
+        expect(user).to.be.equal(user);
 
     });
 
@@ -53,38 +26,52 @@ describe('Entity rule definition', () => {
             }
         };
 
+        expect(user).to.be.equal(user);
+
     });
 
     it('work with nested property', () => {
 
         let user: EntityRule<User> = {
-            "permissions": <PropertyRule<Permissions>>{
-                "read": {
+            name: {
+                ".validate": true
+            },
+            permissions: {
+                read: {
                     ".validate": true
                 },
-                "write": {
+                write: {
                     ".validate": true
+                }
+            },
+            relatives: {
+                "$id": {
+                    ".indexOn": ["name"],
+                    "$other": {
+                        ".validate": false
+                    }
                 }
             }
         };
+
+        expect(user).to.be.equal(user);
 
     });
 
     it('work with collection', () => {
 
         let user: EntityRule<User> = {
-            "relatives": <CollectionRule<Relative>>{
-                ".indexOn": [ "id" ],
+            "relatives": {
+                ".indexOn": [ "name" ],
                 "$key": {
-                    id: {
-                        ".validate": true
-                    },
                     name: {
                         ".validate": true
                     }
                 }
             }
         };
+
+        expect(user).to.be.equal(user);
 
     });
 
@@ -107,18 +94,17 @@ describe('Entity rule definition', () => {
                 }
             },
 
-            "relatives": <CollectionRule<Relative>>{
-                ".indexOn": [ "id" ],
+            "relatives": {
+                ".indexOn": [ "name" ],
                 "$key": {
-                    id: {
-                        ".validate": true
-                    },
                     name: {
                         ".validate": true
                     }
                 }
             }
         };
+
+        expect(user).to.be.equal(user);
 
     });
 
