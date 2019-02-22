@@ -5,9 +5,11 @@ const expect = chai.expect;
 import {
     Rules,
     Builder,
-    check,
     ctx,
-    path
+    path,
+    auth,
+    root,
+    newData
 } from '../lib';
 
 describe('Builder can build', () => {
@@ -44,7 +46,7 @@ describe('Builder can build', () => {
 
     it('index rules', () => {
 
-        let rules: Rules<any> = {
+        let rules: Rules<{ id: number }> = {
             rules: {
                 ".indexOn": ["id"]
             }
@@ -59,7 +61,7 @@ describe('Builder can build', () => {
 
     it('property rules', () => {
 
-        let rules: Rules<any> = {
+        let rules: Rules<{ property: any}> = {
             rules: {
                 "property": {
                     ".validate": true
@@ -76,7 +78,7 @@ describe('Builder can build', () => {
 
     it('nested property rules', () => {
 
-        let rules: Rules<any> = {
+        let rules: Rules<{ property: { nestedProperty: any } }> = {
             rules: {
                 "property": {
                     "nestedProperty": {
@@ -95,7 +97,7 @@ describe('Builder can build', () => {
 
     it('collection rules', () => {
 
-        let rules: Rules<any> = {
+        let rules: Rules<{ entries: { name: string } }> = {
             rules: {
                 "entries": {
                     "$id": {
@@ -116,10 +118,12 @@ describe('Builder can build', () => {
 
     it('rule with equal check', () => {
 
-        let rules: Rules<any> = {
+        let nonNullAuth = auth.unequal.evaluate(null);
+
+        let rules: Rules<{}> = {
             rules: {
-                ".read": check().unequal(ctx().auth, null),
-                ".write": check().unequal(ctx().auth, null).and.equal(ctx().auth.provider, 'password')
+                ".read": nonNullAuth,
+                ".write": nonNullAuth.and.auth.provider.equal.evaluate('password')
             }
         };
 
@@ -138,8 +142,8 @@ describe('Builder can build', () => {
 
         let rules: Rules<any> = {
             rules: {
-                ".read": check().condition(ctx().root.child(path('users')).exists()),
-                ".write": check().not.condition(ctx().root.child(path('users').resolve(ctx().auth.uid)).exists())
+                ".read": ctx().root.child(path('users')).exists(),
+                ".write": ctx().not.root.child(path('users').resolve(auth.uid)).exists()
             }
         };
 
@@ -156,15 +160,15 @@ describe('Builder can build', () => {
 
     it('rule with property child complex path check', () => {
 
+        let rulePath = path('permissions/')
+            .path('/users/')
+            .resolve(ctx().auth.uid)
+            .path('/status/')
+            .path('/lock');
+
         let rules: Rules<any> = {
             rules: {
-                ".read": check().equal(ctx().root.child(
-                    path('permissions/')
-                        .path('/users/')
-                        .resolve(ctx().auth.uid)
-                        .path('/status/')
-                        .path('/lock')
-                ).val(), false)
+                ".read": root.child(rulePath).val().equal.evaluate(false)
             }
         };
 
@@ -178,15 +182,13 @@ describe('Builder can build', () => {
         }));
     });
 
-    it('rule with property child has check', () => {
+    it('rule with property has child check', () => {
 
-        let rules: Rules<any> = {
+        let rules: Rules<{ users: any }> = {
             rules: {
                 "users": {
                     "$user_id": {
-                        ".validate": check().condition(
-                            ctx().newData.hasChild(path('name'))
-                        )
+                        ".validate": newData.hasChild(path('name'))
                     }
                 }
             }
@@ -206,18 +208,16 @@ describe('Builder can build', () => {
         }));
     });
 
-    it('rule with property children has check', () => {
+    it('rule with property has children check', () => {
 
-        let rules: Rules<any> = {
+        let rules: Rules<{ users: any }> = {
             rules: {
                 "users": {
                     "$user_id": {
-                        ".validate": check().condition(
-                            ctx().newData.hasChildren([
-                                path('name'),
-                                path('age')
-                            ])
-                        )
+                        ".validate": newData.hasChildren([
+                            path('name'),
+                            path('age')
+                        ])
                     }
                 }
             }
@@ -239,11 +239,10 @@ describe('Builder can build', () => {
 
     it('rule with property number type check', () => {
 
-        let rules: Rules<any> = {
+        let rules: Rules<{ number: number }> = {
             rules: {
                 "number": {
-                    ".validate": check().condition(ctx().newData.isNumber())
-                        .and.greaterThan(ctx().newData.valNumber(), 0)
+                    ".validate": newData.isNumber().and.newData.val().greaterThan.evaluate(0)
                 }
             }
         };
@@ -262,11 +261,10 @@ describe('Builder can build', () => {
 
     it('rule with property string type check', () => {
 
-        let rules: Rules<any> = {
+        let rules: Rules<{ string: string }> = {
             rules: {
                 "string": {
-                    ".validate": check().condition(ctx().newData.isString())
-                        .and.equal(ctx().newData.valString().length, 10)
+                    ".validate": newData.isString().and.newData.valString().length.equal.evaluate(10)
                 }
             }
         };

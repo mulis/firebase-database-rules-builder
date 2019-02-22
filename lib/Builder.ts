@@ -1,9 +1,12 @@
 import { Rules, ReservedKeys } from './firebase-database-rules';
-import { Check } from './Check';
+import {
+    Check,
+    Context
+} from './index';
 
-export class Builder<T> {
+export class Builder {
 
-    build (input: Rules<T>) {
+    build (input: Rules<any>) {
 
         let rules = input.rules;
         if (!rules) {
@@ -23,6 +26,8 @@ export class Builder<T> {
         let result: any = null;
 
         if (value instanceof Check) {
+            result = value.toString();
+        } else if (value instanceof Context) {
             result = value.toString();
         } else if (typeof value == 'object') {
             result = this.resolveObject(value);
