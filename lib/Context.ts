@@ -3,12 +3,13 @@ import {
     AuthToken,
     RuleVariables,
     RuleDataSnapshot,
+    Value,
     NullValue,
     BooleanValue,
     NumberValue,
     StringValue
 } from './firebase-database-rules';
-import { Token, Operators, Symbols, Operation, Expression } from './Operation';
+import { Token, Operators, Symbols, Expression } from './Operation';
 import { PathBuilder } from './PathBuilder';
 
 type ContextType<T> = {
@@ -58,6 +59,16 @@ export class Context {
             }
         });
         return result;
+    }
+
+    get equal() {
+        let context = Context.spawn(this, Operators.equal);
+        return new RuleVariablesContext(context);
+    }
+
+    get unequal() {
+        let context = Context.spawn(this, Operators.unequal);
+        return new RuleVariablesContext(context);
     }
 
     toString() {
@@ -145,12 +156,12 @@ export class AuthContext
 
     get provider() {
         let context = Context.spawn(this, new Member(`provider`));
-        return new RuleDataSnapshotValue(context);
+        return new RuleDataSnapshotStringValue(context);
     }
 
     get uid() {
         let context = Context.spawn(this, new Member(`uid`));
-        return new RuleDataSnapshotValue(context);
+        return new RuleDataSnapshotStringValue(context);
     }
 
     get token() {
@@ -255,7 +266,7 @@ export class RuleDataSnapshotContext
         return new RuleDataSnapshotNullValue(context);
     }
 
-    child(path: PathBuilder) {
+    child(path: PathBuilder | string) {
         let context = Context.spawn(this, new Member(`child(${path})`))
         return new RuleDataSnapshotContext(context);
     }
@@ -265,12 +276,12 @@ export class RuleDataSnapshotContext
         return new RuleDataSnapshotContext(context);
     }
 
-    hasChild(path: PathBuilder) {
+    hasChild(path: PathBuilder | string) {
         let context = Context.spawn(this, new Member(`hasChild(${path})`));
         return new RuleDataSnapshotBooleanValue(context);
     }
 
-    hasChildren(paths?: PathBuilder[]) {
+    hasChildren(paths?: PathBuilder[] | string[]) {
         let context = Context.spawn(this, new Member(`hasChildren(${paths ? '[' + paths + ']' : ''})`));
         return new RuleDataSnapshotBooleanValue(context);
     }
@@ -303,71 +314,56 @@ export class RuleDataSnapshotContext
 }
 
 export class RuleDataSnapshotValue
-    extends Context {
+    extends Context
+    implements Value {
 
-    get equal() {
-        Context.push(this, Operators.equal);
-        return new RuleVariablesContext(this);
-    }
-
-    get unequal() {
-        Context.push(this, Operators.unequal);
-        return new RuleVariablesContext(this);
+    private appendOperator(operator: Token) {
+        let context = Context.spawn(this, operator);
+        return new RuleVariablesContext(context);
     }
 
     get and() {
-        Context.push(this, Operators.and);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.and);
     }
 
     get or() {
-        Context.push(this, Operators.or);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.or);
     }
 
     get greaterThan() {
-        Context.push(this, Operators.greaterThan);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.greaterThan);
     }
 
     get greaterThanOrEqualTo() {
-        Context.push(this, Operators.greaterThanOrEqualTo);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.greaterThanOrEqualTo);
     }
 
     get lessThan() {
-        Context.push(this, Operators.lessThan);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.lessThan);
     }
 
     get lessThanOrEqualTo() {
-        Context.push(this, Operators.lessThanOrEqualTo);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.lessThanOrEqualTo);
     }
 
     get add() {
-        Context.push(this, Operators.add);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.add);
     }
 
     get subtract() {
-        Context.push(this, Operators.subtract);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.subtract);
     }
 
     get multiply() {
-        Context.push(this, Operators.multiply);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.multiply);
     }
 
     get divide() {
-        Context.push(this, Operators.divide);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.divide);
     }
 
     get modulus() {
-        Context.push(this, Operators.modulus);
-        return new RuleVariablesContext(this);
+        return this.appendOperator(Operators.modulus);
     }
 
 }
