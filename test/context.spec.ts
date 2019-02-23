@@ -87,6 +87,12 @@ describe('Context produces correct string', () => {
             expect(snapshot.toString()).to.be.equal("data.child('a')");
         });
 
+        it('method child with string path', () => {
+            let snapshot = ctx().data.child("a");
+            expect(snapshot).instanceOf(RuleDataSnapshotContext);
+            expect(snapshot.toString()).to.be.equal("data.child('a')");
+        });
+
         it('method parent', () => {
             let snapshot = ctx().data.parent();
             expect(snapshot).instanceOf(RuleDataSnapshotContext);
@@ -95,6 +101,12 @@ describe('Context produces correct string', () => {
 
         it('method hasChild', () => {
             let result = ctx().data.hasChild(path("a"));
+            expect(result).instanceOf(RuleDataSnapshotBooleanValue);
+            expect(result.toString()).to.be.equal("data.hasChild('a')");
+        });
+
+        it('method hasChild with string path', () => {
+            let result = ctx().data.hasChild("a");
             expect(result).instanceOf(RuleDataSnapshotBooleanValue);
             expect(result.toString()).to.be.equal("data.hasChild('a')");
         });
@@ -111,10 +123,22 @@ describe('Context produces correct string', () => {
             expect(result.toString()).to.be.equal("data.hasChildren(['a'])");
         });
 
+        it('method hasChildren with single string path', () => {
+            let result = ctx().data.hasChildren(["a"]);
+            expect(result).instanceOf(RuleDataSnapshotBooleanValue);
+            expect(result.toString()).to.be.equal("data.hasChildren(['a'])");
+        });
+
         it('method hasChildren with several paths', () => {
             let result = ctx().data.hasChildren([path("a"), path("b")]);
             expect(result).instanceOf(RuleDataSnapshotBooleanValue);
-            expect(result.toString()).to.be.equal("data.hasChildren(['a','b'])");
+            expect(result.toString()).to.be.equal("data.hasChildren(['a', 'b'])");
+        });
+
+        it('method hasChildren with several string paths', () => {
+            let result = ctx().data.hasChildren(["a", "b"]);
+            expect(result).instanceOf(RuleDataSnapshotBooleanValue);
+            expect(result.toString()).to.be.equal("data.hasChildren(['a', 'b'])");
         });
 
         it('method exists', () => {

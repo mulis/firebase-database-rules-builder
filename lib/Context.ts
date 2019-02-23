@@ -267,6 +267,7 @@ export class RuleDataSnapshotContext
     }
 
     child(path: PathBuilder | string) {
+        path = typeof path === 'string' ? new PathBuilder(path) : path;
         let context = Context.spawn(this, new Member(`child(${path})`))
         return new RuleDataSnapshotContext(context);
     }
@@ -277,12 +278,14 @@ export class RuleDataSnapshotContext
     }
 
     hasChild(path: PathBuilder | string) {
+        path = typeof path === 'string' ? new PathBuilder(path) : path;
         let context = Context.spawn(this, new Member(`hasChild(${path})`));
         return new RuleDataSnapshotBooleanValue(context);
     }
 
-    hasChildren(paths?: PathBuilder[] | string[]) {
-        let context = Context.spawn(this, new Member(`hasChildren(${paths ? '[' + paths + ']' : ''})`));
+    hasChildren(paths?: (PathBuilder | string)[]) {
+        paths = (paths || []).map(path => typeof path === 'string' ? new PathBuilder(path) : path);
+        let context = Context.spawn(this, new Member(`hasChildren(${paths.length ? '[' + paths.join(', ') + ']' : ''})`));
         return new RuleDataSnapshotBooleanValue(context);
     }
 

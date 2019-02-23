@@ -230,7 +230,7 @@ describe('Builder can build', () => {
             "rules": {
                 "users": {
                     "$user_id": {
-                        ".validate": "newData.hasChildren(['name','age'])"
+                        ".validate": "newData.hasChildren(['name', 'age'])"
                     }
                 }
             }
