@@ -20,7 +20,7 @@
         "test:ts:w": "npx tsc-watch --onSuccess 'npm run test'"
     },
     "author": "muliserg",
-    "license": "ISC",
+    "license": "MIT",
     "dependencies": {
     },
     "devDependencies": {
