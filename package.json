@@ -19,8 +19,9 @@
         "test:ts": "npx mocha --require ts-node/register test/ts/**/*.spec.ts",
         "test:ts:w": "npx tsc-watch --onSuccess 'npm run test'"
     },
-    "author": "muliserg",
+    "author": "mulis",
     "license": "MIT",
+    "repository": "github:mulis/firebase-database-rules-builder",
     "dependencies": {
     },
     "devDependencies": {
