@@ -1,6 +1,6 @@
 {
     "name": "firebase-database-rules-builder",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Firebase database rules builder",
     "main": "lib/index.js",
     "files": [
