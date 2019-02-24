@@ -1,8 +1,5 @@
 import { Rules, ReservedKeys } from './firebase-database-rules';
-import {
-    Check,
-    Context
-} from './index';
+import { Context } from './index';
 
 export class Builder {
 
@@ -25,9 +22,7 @@ export class Builder {
 
         let result: any = null;
 
-        if (value instanceof Check) {
-            result = value.toString();
-        } else if (value instanceof Context) {
+        if (value instanceof Context) {
             result = value.toString();
         } else if (typeof value == 'object') {
             result = this.resolveObject(value);
