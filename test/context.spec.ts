@@ -3,7 +3,6 @@ import * as chai from 'chai';
 const expect = chai.expect;
 
 import {
-    RuleVariablesContext,
     RuleDataSnapshotContext,
     RuleDataSnapshotValue,
     RuleDataSnapshotNullValue,
@@ -21,7 +20,7 @@ import {
 
 describe('Context produces correct string', () => {
 
-    describe('with rule variable on context', () => {
+    describe('with rule variable', () => {
 
         it('auth', () => {
             expect(ctx().auth.toString()).to.be.equal("auth");
@@ -45,6 +44,96 @@ describe('Context produces correct string', () => {
 
         it('newData', () => {
             expect(ctx().newData.toString()).to.be.equal("newData");
+        });
+
+    });
+
+    describe('with exported rule variable', () => {
+
+        it('auth', () => {
+            expect(auth.toString()).to.be.equal('auth');
+            expect(auth.uid.toString()).to.be.equal('auth.uid');
+            expect(auth.token.toString()).to.be.equal('auth.token');
+            expect(auth.token.email.toString()).to.be.equal('auth.token.email');
+            expect(auth.token.name.toString()).to.be.equal('auth.token.name');
+        });
+
+        it('now', () => {
+            expect(now.toString()).to.be.equal('now');
+        });
+
+        it('root', () => {
+            expect(root.toString()).to.be.equal('root');
+            expect(root.exists().toString()).to.be.equal('root.exists()');
+            expect(root.isBoolean().toString()).to.be.equal('root.isBoolean()');
+        });
+
+        it('data', () => {
+            expect(data.toString()).to.be.equal('data');
+            expect(data.exists().toString()).to.be.equal('data.exists()');
+            expect(data.isBoolean().toString()).to.be.equal('data.isBoolean()');
+        });
+
+        it('newData', () => {
+            expect(newData.toString()).to.be.equal('newData');
+            expect(newData.exists().toString()).to.be.equal('newData.exists()');
+            expect(newData.isBoolean().toString()).to.be.equal('newData.isBoolean()');
+        });
+
+    });
+
+    describe('with stored rule', () => {
+
+        it('operation not', () => {
+            let not = ctx().not;
+            expect(not.data.exists().toString()).to.be.equal('!data.exists()');
+            expect(not.data.isBoolean().toString()).to.be.equal('!data.isBoolean()');
+        });
+
+        it('operation negate', () => {
+            let negate = ctx().negate;
+            expect(negate.data.val().toString()).to.be.equal('-data.val()');
+            expect(negate.newData.val().toString()).to.be.equal('-newData.val()');
+        });
+
+        it('method evaluate', () => {
+            let evaluate = ctx().evaluate;
+            expect(evaluate(1).toString()).to.be.equal("1");
+            expect(evaluate('1').toString()).to.be.equal("'1'");
+        });
+
+        it('method scope', () => {
+            let scope = ctx().scope;
+            expect(scope(1).toString()).to.be.equal("(1)");
+            expect(scope('1').toString()).to.be.equal("('1')");
+        });
+
+    });
+
+    describe('with chained rule', () => {
+
+        it('operation equal', () => {
+            expect(data.val().equal.newData.val().toString()).to.be.equal('data.val() === newData.val()');
+        });
+
+        it('operation unequal', () => {
+            expect(data.val().unequal.newData.val().toString()).to.be.equal('data.val() !== newData.val()');
+        });
+
+        it('operation not', () => {
+            expect(data.val().equal.not.newData.val().toString()).to.be.equal('data.val() === !newData.val()');
+        });
+
+        it('operation negate', () => {
+            expect(data.val().equal.negate.newData.val().toString()).to.be.equal('data.val() === -newData.val()');
+        });
+
+        it('method evaluate', () => {
+            expect(data.val().equal.evaluate(1).toString()).to.be.equal('data.val() === 1');
+        });
+
+        it('method scope', () => {
+            expect(data.exists().and.scope(data.val().unequal.newData.val()).toString()).to.be.equal('data.exists() && (data.val() !== newData.val())');
         });
 
     });
@@ -175,49 +264,49 @@ describe('Context produces correct string', () => {
 
     describe('with rule string value', () => {
 
-        it('on property length', () => {
+        it('property length', () => {
             let result = ctx().data.valString().length;
             expect(result).instanceOf(RuleDataSnapshotNumberValue);
             expect(result.toString()).to.be.equal("data.val().length");
         });
 
-        it('on method contains', () => {
+        it('method contains', () => {
             let result = ctx().data.valString().contains("a");
             expect(result).instanceOf(RuleDataSnapshotBooleanValue);
             expect(result.toString()).to.be.equal("data.val().contains('a')");
         });
 
-        it('on method beginsWith', () => {
+        it('method beginsWith', () => {
             let result = ctx().data.valString().beginsWith("a");
             expect(result).instanceOf(RuleDataSnapshotBooleanValue);
             expect(result.toString()).to.be.equal("data.val().beginsWith('a')");
         });
 
-        it('on method endsWith', () => {
+        it('method endsWith', () => {
             let result = ctx().data.valString().endsWith("a");
             expect(result).instanceOf(RuleDataSnapshotBooleanValue);
             expect(result.toString()).to.be.equal("data.val().endsWith('a')");
         });
 
-        it('on method replace', () => {
+        it('method replace', () => {
             let result = ctx().data.valString().replace("a", "b");
             expect(result).instanceOf(RuleDataSnapshotStringValue);
             expect(result.toString()).to.be.equal("data.val().replace('a','b')");
         });
 
-        it('on method toLowerCase', () => {
+        it('method toLowerCase', () => {
             let result = ctx().data.valString().toLowerCase();
             expect(result).instanceOf(RuleDataSnapshotStringValue);
             expect(result.toString()).to.be.equal("data.val().toLowerCase()");
         });
 
-        it('on method toUpperCase', () => {
+        it('method toUpperCase', () => {
             let result = ctx().data.valString().toUpperCase();
             expect(result).instanceOf(RuleDataSnapshotStringValue);
             expect(result.toString()).to.be.equal("data.val().toUpperCase()");
         });
 
-        it('on method matches', () => {
+        it('method matches', () => {
             let result = ctx().data.valString().matches("/a/i");
             expect(result).instanceOf(RuleDataSnapshotBooleanValue);
             expect(result.toString()).to.be.equal("data.val().matches(/a/i)");
@@ -225,99 +314,21 @@ describe('Context produces correct string', () => {
 
     });
 
-    describe('with exported rule variable', () => {
+    describe('with string value chain', () => {
 
-        it('auth', () => {
-            expect(auth.toString()).to.be.equal('auth');
-            expect(auth.uid.toString()).to.be.equal('auth.uid');
-            expect(auth.token.toString()).to.be.equal('auth.token');
-            expect(auth.token.email.toString()).to.be.equal('auth.token.email');
-            expect(auth.token.name.toString()).to.be.equal('auth.token.name');
-        });
-
-        it('now', () => {
-            expect(now.toString()).to.be.equal('now');
-        });
-
-        it('root', () => {
-            expect(root.toString()).to.be.equal('root');
-            expect(root.exists().toString()).to.be.equal('root.exists()');
-            expect(root.isBoolean().toString()).to.be.equal('root.isBoolean()');
-        });
-
-        it('data', () => {
-            expect(data.toString()).to.be.equal('data');
-            expect(data.exists().toString()).to.be.equal('data.exists()');
-            expect(data.isBoolean().toString()).to.be.equal('data.isBoolean()');
-        });
-
-        it('newData', () => {
-            expect(newData.toString()).to.be.equal('newData');
-            expect(newData.exists().toString()).to.be.equal('newData.exists()');
-            expect(newData.isBoolean().toString()).to.be.equal('newData.isBoolean()');
-        });
-
-    });
-
-    describe('with chaining rule variable', () => {
-
-        it('not', () => {
-            let not = (new RuleVariablesContext()).not;
-            expect(not.data.exists().toString()).to.be.equal('!data.exists()');
-            expect(not.data.isBoolean().toString()).to.be.equal('!data.isBoolean()');
-        });
-
-        it('negate', () => {
-            let negate = (new RuleVariablesContext()).negate;
-            expect(negate.data.val().toString()).to.be.equal('-data.val()');
-            expect(negate.newData.val().toString()).to.be.equal('-newData.val()');
-        });
-
-        it('eval', () => {
-            let evaluate = (new RuleVariablesContext()).evaluate;
-            expect(evaluate(1).toString()).to.be.equal("1");
-            expect(evaluate('1').toString()).to.be.equal("'1'");
-        });
-
-        it('scope', () => {
-            let scope = (new RuleVariablesContext()).scope;
-            expect(scope(1).toString()).to.be.equal("(1)");
-            expect(scope('1').toString()).to.be.equal("('1')");
-        });
-
-    });
-
-    describe('with value chain', () => {
-
-        it('equal', () => {
-            expect(data.val().equal.newData.val().toString()).to.be.equal('data.val() === newData.val()');
-        });
-
-        it('unequal', () => {
-            expect(data.val().unequal.newData.val().toString()).to.be.equal('data.val() !== newData.val()');
-        });
-
-        it('not', () => {
-            expect(data.val().equal.not.newData.val().toString()).to.be.equal('data.val() === !newData.val()');
-        });
-
-        it('eval', () => {
-            expect(data.val().equal.evaluate(1).toString()).to.be.equal('data.val() === 1');
-        });
-
-        it('scope', () => {
-            expect(data.exists().and.scope(data.val().unequal.newData.val()).toString()).to.be.equal('data.exists() && (data.val() !== newData.val())');
+        it('operation add', () => {
+            expect(data.valString().add.newData.valString().toString()).to.be.equal('data.val() + newData.val()');
         });
 
     });
 
     describe('with boolean value chain', () => {
 
-        it('and', () => {
+        it('operation and', () => {
             expect(data.isBoolean().and.newData.isBoolean().toString()).to.be.equal('data.isBoolean() && newData.isBoolean()');
         });
 
-        it('or', () => {
+        it('operation or', () => {
             expect(newData.isNumber().or.newData.isString().toString()).to.be.equal('newData.isNumber() || newData.isString()');
             expect(newData.val().equal.evaluate(1).or.newData.val().equal.evaluate(2).toString()).to.be.equal('newData.val() === 1 || newData.val() === 2');
         });
@@ -326,39 +337,39 @@ describe('Context produces correct string', () => {
 
     describe('with number value chain', () => {
 
-        it('greaterThan', () => {
+        it('operation greaterThan', () => {
             expect(newData.valNumber().greaterThan.now.toString()).to.be.equal('newData.val() > now');
         });
 
-        it('greaterThanOrEqualTo', () => {
+        it('operation greaterThanOrEqualTo', () => {
             expect(newData.valNumber().greaterThanOrEqualTo.now.toString()).to.be.equal('newData.val() >= now');
         });
 
-        it('lessThan', () => {
+        it('operation lessThan', () => {
             expect(newData.valNumber().lessThan.now.toString()).to.be.equal('newData.val() < now');
         });
 
-        it('lessThanOrEqualTo', () => {
+        it('operation lessThanOrEqualTo', () => {
             expect(newData.valNumber().lessThanOrEqualTo.now.toString()).to.be.equal('newData.val() <= now');
         });
 
-        it('add', () => {
+        it('operation add', () => {
             expect(data.valNumber().add.newData.valNumber().toString()).to.be.equal('data.val() + newData.val()');
         });
 
-        it('subtract', () => {
+        it('operation subtract', () => {
             expect(data.valNumber().subtract.newData.valNumber().toString()).to.be.equal('data.val() - newData.val()');
         });
 
-        it('multiply', () => {
+        it('operation multiply', () => {
             expect(data.valNumber().multiply.newData.valNumber().toString()).to.be.equal('data.val() * newData.val()');
         });
 
-        it('divide', () => {
+        it('operation divide', () => {
             expect(data.valNumber().divide.newData.valNumber().toString()).to.be.equal('data.val() / newData.val()');
         });
 
-        it('modulus', () => {
+        it('operation modulus', () => {
             expect(data.valNumber().modulus.newData.valNumber().toString()).to.be.equal('data.val() % newData.val()');
         });
 
