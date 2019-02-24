@@ -5,7 +5,7 @@ const expect = chai.expect;
 import {
     CollectionRule,
     ctx
-} from '../lib';
+} from '../../lib';
 
 import { User, Relative } from './common.spec';
 

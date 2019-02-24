@@ -16,7 +16,7 @@ import {
     root,
     data,
     newData
-} from "../lib";
+} from "../../lib";
 
 describe('Context produces correct string', () => {
 
@@ -100,6 +100,7 @@ describe('Context produces correct string', () => {
             let evaluate = ctx().evaluate;
             expect(evaluate(1).toString()).to.be.equal("1");
             expect(evaluate('1').toString()).to.be.equal("'1'");
+            expect(evaluate(newData.isBoolean()).toString()).to.be.equal("newData.isBoolean()");
         });
 
         it('method scope', () => {

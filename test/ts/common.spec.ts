@@ -1,6 +1,6 @@
 import {
     Collection
-} from '../lib';
+} from '../../lib';
 
 export interface Permissions {
 

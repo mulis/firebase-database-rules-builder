@@ -2,7 +2,7 @@ import * as chai from 'chai';
 
 const expect = chai.expect;
 
-import { EntityRule } from '../lib';
+import { EntityRule } from '../../lib';
 
 import { User } from './common.spec';
 

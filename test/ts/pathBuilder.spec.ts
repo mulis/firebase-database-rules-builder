@@ -2,7 +2,7 @@ import * as chai from 'chai';
 
 const expect = chai.expect;
 
-import { path } from '../lib';
+import { path } from '../../lib';
 
 describe('PathBuilder produces correct string', () => {
 

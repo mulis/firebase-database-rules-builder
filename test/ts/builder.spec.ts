@@ -10,7 +10,7 @@ import {
     auth,
     root,
     newData
-} from '../lib';
+} from '../../lib';
 
 describe('Builder can build', () => {
 

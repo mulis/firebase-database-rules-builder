@@ -10,10 +10,14 @@
     ],
     "scripts": {
         "prepare": "tsc",
+        "pretest": "tsc",
         "tsc": "npx tsc",
         "tsc:w": "npx tsc -w",
-        "test": "npx mocha --require ts-node/register test/**/*.spec.ts",
-        "test:w": "npx tsc-watch --onSuccess 'npm run test'"
+        "test": "npm run test:js && npm run test:ts",
+        "test:js": "npx mocha test/js/**/*.spec.js",
+        "test:js:w": "npm run test:js -- --watch",
+        "test:ts": "npx mocha --require ts-node/register test/ts/**/*.spec.ts",
+        "test:ts:w": "npx tsc-watch --onSuccess 'npm run test'"
     },
     "author": "muliserg",
     "license": "ISC",
