@@ -123,20 +123,17 @@ export class RuleVariablesContext
     // Chaining properties and methods
 
     get not() {
-        let context = new Context(this);
-         Context.push(context, Operators.not);
+        let context = Context.spawn(this, Operators.not);
         return new RuleVariablesContext(context);
     }
 
     get negate() {
-        let context = new Context(this);
-         Context.push(context, Operators.negate);
+        let context = Context.spawn(this, Operators.negate);
         return new RuleVariablesContext(context);
     }
 
     evaluate(expression: Expression) {
-        let context = new Context(this);
-        Context.push(context, expression);
+        let context = Context.spawn(this, expression);
         return new RuleDataSnapshotValue(context);
     }
 
